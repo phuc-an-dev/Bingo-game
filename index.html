@@ -310,63 +310,19 @@
           cell.className = "bingo-cell";
           cell.textContent = shuffledQuestions[i];
           cell.clickTimeout = null;
-          cell.addEventListener("click", handleCellClick);
-          if ("ontouchstart" in window) {
-            cell.addEventListener("touchstart", handleCellDoubleTap);
-          } else {
-            cell.addEventListener("dblclick", handleCellDoubleClick);
-          }
+          cell.addEventListener("touchstart", handleCellTouch);
           bingoBoard.appendChild(cell);
         }
       }
 
-      // Xử lý sự kiện click vào ô bingo
-      function handleCellClick(e) {
-        const cell = this;
-        if (cell.clickTimeout !== null) {
-          clearTimeout(cell.clickTimeout);
-          cell.clickTimeout = null;
-          return;
-        }
-
-        cell.clickTimeout = setTimeout(function () {
-          if (cell.classList.contains("checked")) {
-            cell.classList.remove("checked");
-          } else if (cell.classList.contains("crossed")) {
-            cell.classList.remove("crossed");
-          } else {
-            cell.classList.add("checked");
-            cell.classList.remove("crossed");
-          }
-          cell.clickTimeout = null;
-        }, 300);
-      }
-
-      // Xử lý sự kiện double click
-      function handleCellDoubleClick(e) {
-        e.preventDefault();
-        if (this.clickTimeout !== null) {
-          clearTimeout(this.clickTimeout);
-          this.clickTimeout = null;
-        }
-
-        if (this.classList.contains("crossed")) {
-          this.classList.remove("crossed");
-          this.classList.remove("checked");
-        } else {
-          this.classList.add("crossed");
-          this.classList.remove("checked");
-        }
-      }
-
-      // Xử lý sự kiện double tap trên điện thoại
-      function handleCellDoubleTap(e) {
-        e.preventDefault();
+      // Xử lý sự kiện touch (thay thế click và double click)
+      function handleCellTouch(e) {
+        e.preventDefault(); // Ngăn chặn hành vi zoom khi double tap
         const cell = this;
 
         const now = Date.now();
         if (now - cell.lastTap < 300) {
-          // Nếu double tap trong vòng 300ms
+          // Nếu double tap trong vòng 300ms -> Đánh dấu chéo
           if (cell.classList.contains("crossed")) {
             cell.classList.remove("crossed");
             cell.classList.remove("checked");
@@ -374,8 +330,22 @@
             cell.classList.add("crossed");
             cell.classList.remove("checked");
           }
-          cell.lastTap = 0; // Reset lại
+          cell.lastTap = 0; // Reset lại thời gian tap
         } else {
+          // Nếu chỉ tap một lần -> Đánh dấu
+          setTimeout(() => {
+            if (cell.lastTap !== 0) {
+              if (cell.classList.contains("checked")) {
+                cell.classList.remove("checked");
+              } else if (cell.classList.contains("crossed")) {
+                cell.classList.remove("crossed");
+              } else {
+                cell.classList.add("checked");
+                cell.classList.remove("crossed");
+              }
+              cell.lastTap = 0;
+            }
+          }, 300);
           cell.lastTap = now;
         }
       }
