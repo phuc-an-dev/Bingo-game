@@ -311,7 +311,11 @@
           cell.textContent = shuffledQuestions[i];
           cell.clickTimeout = null;
           cell.addEventListener("click", handleCellClick);
-          cell.addEventListener("dblclick", handleCellDoubleClick);
+          if ("ontouchstart" in window) {
+            cell.addEventListener("touchstart", handleCellDoubleTap);
+          } else {
+            cell.addEventListener("dblclick", handleCellDoubleClick);
+          }
           bingoBoard.appendChild(cell);
         }
       }
@@ -352,6 +356,27 @@
         } else {
           this.classList.add("crossed");
           this.classList.remove("checked");
+        }
+      }
+
+      // Xử lý sự kiện double tap trên điện thoại
+      function handleCellDoubleTap(e) {
+        e.preventDefault();
+        const cell = this;
+
+        const now = Date.now();
+        if (now - cell.lastTap < 300) {
+          // Nếu double tap trong vòng 300ms
+          if (cell.classList.contains("crossed")) {
+            cell.classList.remove("crossed");
+            cell.classList.remove("checked");
+          } else {
+            cell.classList.add("crossed");
+            cell.classList.remove("checked");
+          }
+          cell.lastTap = 0; // Reset lại
+        } else {
+          cell.lastTap = now;
         }
       }
 
