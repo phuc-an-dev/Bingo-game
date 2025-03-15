@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bảng Bingo Tương Tác</title>
+    <title>Để mình hiểu nhau hơn</title>
     <style>
       * {
         margin: 0;
@@ -26,6 +26,48 @@
         color: #333;
         margin-bottom: 20px;
         text-align: center;
+      }
+
+      .theme-selector {
+        background-color: #fff;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 15px;
+        width: 100%;
+        max-width: 500px;
+      }
+
+      .theme-selector h3 {
+        margin-bottom: 10px;
+        color: #333;
+        text-align: center;
+      }
+
+      .theme-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .theme-button {
+        padding: 8px 15px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      .theme-button:hover {
+        background-color: #3e8e41;
+      }
+
+      .theme-button.active {
+        background-color: #2e7d32;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
       }
 
       .bingo-container {
@@ -90,29 +132,6 @@
         background-color: rgba(255, 0, 0, 0.1);
       }
 
-      .instructions {
-        background-color: #fff;
-        padding: 15px;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        margin-bottom: 15px;
-        width: 100%;
-        max-width: 500px;
-      }
-
-      .instructions h3 {
-        margin-bottom: 10px;
-        color: #333;
-      }
-
-      .instructions ul {
-        padding-left: 20px;
-      }
-
-      .instructions li {
-        margin-bottom: 5px;
-      }
-
       @media (max-width: 600px) {
         .bingo-cell {
           min-height: 60px;
@@ -127,50 +146,138 @@
     </style>
   </head>
   <body>
-    <h1>Bảng Bingo Tương Tác</h1>
-
-    <div class="instructions">
-      <h3>Hướng dẫn:</h3>
-      <ul>
-        <li>Nhấn 1 lần: Hiển thị dấu tích (✔)</li>
-        <li>Nhấn 2 lần: Hiển thị dấu chéo (✘)</li>
-        <li>Nhấn 3 lần: Trở về trạng thái ban đầu</li>
-      </ul>
-    </div>
+    <h1>Để mình hiểu nhau hơn</h1>
 
     <div class="bingo-container">
       <div class="bingo-board" id="bingoBoard"></div>
     </div>
 
+    <div class="theme-selector">
+      <h3>Chọn chủ đề:</h3>
+      <div class="theme-buttons" id="themeButtons"></div>
+    </div>
+
     <script>
-      // Mảng chứa 25 câu hỏi về tính cách và sở thích
-      const questions = [
-        "Thích đi du lịch khám phá",
-        "Thường xuyên đọc sách",
-        "Thích nấu ăn",
-        "Có sở thích chơi thể thao",
-        "Có tính kiên nhẫn cao",
-        "Thích âm nhạc cổ điển",
-        "Thường xuyên tập thể dục",
-        "Là người hướng nội",
-        "Quan tâm đến thời trang",
-        "Thích chơi game",
-        "Có khả năng sáng tạo",
-        "Thích động vật",
-        "Có tính ngăn nắp",
-        "Thích ăn đồ cay",
-        "Thích xem phim",
-        "Có thói quen dậy sớm",
-        "Thích học ngôn ngữ mới",
-        "Quan tâm đến môi trường",
-        "Thích công nghệ mới",
-        "Có khả năng lãnh đạo",
-        "Thích làm việc nhóm",
-        "Thích vẽ hoặc hội họa",
-        "Hay lo lắng về tương lai",
-        "Thích mạo hiểm",
-        "Thích cà phê buổi sáng",
+      // Khai báo các bộ câu hỏi và themes
+      const themes = [
+        { id: "personality", name: "Tính cách" },
+        { id: "hobbies", name: "Sở thích" },
+        { id: "social", name: "Xã hội" },
+        { id: "values", name: "Giá trị sống" },
       ];
+
+      const questionSets = {
+        personality: [
+          "Là người hướng nội",
+          "Là người hướng ngoại",
+          "Có tính kiên nhẫn cao",
+          "Dễ lo lắng về tương lai",
+          "Cẩn thận và tỉ mỉ",
+          "Thích tự do, không theo khuôn khổ",
+          "Luôn suy nghĩ trước khi hành động",
+          "Thường đưa ra quyết định nhanh chóng",
+          "Dễ xúc động",
+          "Có tính ngăn nắp",
+          "Cởi mở với ý tưởng mới",
+          "Có óc phân tích cao",
+          "Tin tưởng vào trực giác",
+          "Có tính cạnh tranh",
+          "Thích sự yên tĩnh",
+          "Nhạy cảm với cảm xúc người khác",
+          "Cầu toàn trong công việc",
+          "Thích làm nhiều việc cùng lúc",
+          "Chú trọng chi tiết",
+          "Dễ thích nghi với sự thay đổi",
+          "Thích kế hoạch rõ ràng",
+          "Có khả năng lãnh đạo",
+          "Quan tâm đến cảm xúc người khác",
+          "Thích đứng sau hậu trường",
+          "Thường xuất hiện ý tưởng đột phá",
+        ],
+        hobbies: [
+          "Thích đọc sách",
+          "Thích xem phim",
+          "Thích nấu ăn",
+          "Thích chơi game",
+          "Thích nghe nhạc",
+          "Thích vẽ hoặc hội họa",
+          "Thích du lịch khám phá",
+          "Thích chơi thể thao",
+          "Thích học ngôn ngữ mới",
+          "Thích làm vườn",
+          "Thích công nghệ mới",
+          "Thích thủ công mỹ nghệ",
+          "Thích sưu tầm đồ vật",
+          "Thích tham gia hoạt động tình nguyện",
+          "Thích cà phê buổi sáng",
+          "Thích chụp ảnh",
+          "Thích viết lách",
+          "Thích khiêu vũ",
+          "Thích âm nhạc cổ điển",
+          "Thích nuôi thú cưng",
+          "Thích đi bộ trong tự nhiên",
+          "Thích chơi nhạc cụ",
+          "Thích đi mua sắm",
+          "Thích tụ tập bạn bè",
+          "Thích yoga hoặc thiền",
+        ],
+        social: [
+          "Thường tham gia các hoạt động tình nguyện",
+          "Có nhiều bạn thân",
+          "Thích làm việc nhóm",
+          "Thích các buổi tiệc đông người",
+          "Quan tâm đến vấn đề xã hội",
+          "Thích trao đổi, tranh luận",
+          "Dễ kết bạn với người mới",
+          "Thích tham gia các câu lạc bộ",
+          "Hay giúp đỡ người khác",
+          "Thích đưa ra ý kiến cá nhân",
+          "Thường gặp gỡ bạn bè hàng tuần",
+          "Thích chia sẻ trên mạng xã hội",
+          "Quan tâm đến tin tức thời sự",
+          "Thích kết nối với người có sở thích giống mình",
+          "Thoải mái nói chuyện với người lạ",
+          "Thích lắng nghe người khác",
+          "Có khả năng hòa giải mâu thuẫn",
+          "Thích tổ chức sự kiện cho nhóm",
+          "Thường là người kết nối mọi người",
+          "Quan tâm đến cảm nhận của người khác",
+          "Thích chụp ảnh nhóm",
+          "Thích gặp gỡ, giao lưu văn hóa",
+          "Thích tham gia hoạt động cộng đồng",
+          "Thường giữ liên lạc với bạn cũ",
+          "Thích chia sẻ kinh nghiệm cá nhân",
+        ],
+        values: [
+          "Trung thực là điều quan trọng nhất",
+          "Gia đình là ưu tiên hàng đầu",
+          "Coi trọng sự độc lập cá nhân",
+          "Đề cao sự công bằng",
+          "Tin vào sự làm việc chăm chỉ",
+          "Coi trọng lòng biết ơn",
+          "Luôn hướng đến sự hoàn thiện bản thân",
+          "Trân trọng tình bạn chân thành",
+          "Đề cao sự tự do",
+          "Tin vào lòng tốt của con người",
+          "Quan tâm đến môi trường",
+          "Coi trọng sức khỏe",
+          "Đề cao tinh thần trách nhiệm",
+          "Tin vào việc sống có mục đích",
+          "Trân trọng những điều giản dị",
+          "Đề cao sự tôn trọng lẫn nhau",
+          "Coi trọng trí tuệ và tri thức",
+          "Tin vào sức mạnh của sự kiên nhẫn",
+          "Trân trọng sự đa dạng",
+          "Đề cao lòng dũng cảm",
+          "Tin vào việc giúp đỡ người khác",
+          "Coi trọng sự đáng tin cậy",
+          "Đề cao tính sáng tạo",
+          "Trân trọng di sản văn hóa",
+          "Tin vào sự cân bằng trong cuộc sống",
+        ],
+      };
+
+      let currentQuestions = [];
 
       // Trộn mảng câu hỏi
       function shuffleArray(array) {
@@ -181,78 +288,98 @@
         return array;
       }
 
-      // Khởi tạo bảng bingo
-      function initBingoBoard() {
+      // Xóa bảng bingo hiện tại
+      function clearBingoBoard() {
         const bingoBoard = document.getElementById("bingoBoard");
-        const shuffledQuestions = shuffleArray([...questions]);
+        bingoBoard.innerHTML = "";
+      }
 
-        // Tạo 25 ô bingo
+      // Khởi tạo bảng bingo với chủ đề đã chọn
+      function initBingoBoard(theme) {
+        clearBingoBoard();
+        currentQuestions = questionSets[theme] || questionSets.personality;
+        const bingoBoard = document.getElementById("bingoBoard");
+        const shuffledQuestions = shuffleArray([...currentQuestions]);
+
         for (let i = 0; i < 25; i++) {
           const cell = document.createElement("div");
           cell.className = "bingo-cell";
           cell.textContent = shuffledQuestions[i];
-
-          // Thêm sự kiện click
+          cell.clickTimeout = null;
           cell.addEventListener("click", handleCellClick);
-
-          // Vô hiệu hóa double-click để tránh phóng to màn hình
-          cell.addEventListener("dblclick", function (e) {
-            e.preventDefault();
-          });
-
-          // Thêm sự kiện nhấn giữ
-          let pressTimer;
-
-          cell.addEventListener("mousedown", function () {
-            pressTimer = setTimeout(() => {
-              resetCell(this);
-            }, 500);
-          });
-
-          cell.addEventListener("mouseup", function () {
-            clearTimeout(pressTimer);
-          });
-
-          cell.addEventListener("touchstart", function (e) {
-            pressTimer = setTimeout(() => {
-              resetCell(this);
-            }, 500);
-          });
-
-          cell.addEventListener("touchend", function (e) {
-            clearTimeout(pressTimer);
-          });
-
+          cell.addEventListener("dblclick", handleCellDoubleClick);
           bingoBoard.appendChild(cell);
         }
       }
 
       // Xử lý sự kiện click vào ô bingo
-      function handleCellClick() {
-        if (
-          !this.classList.contains("checked") &&
-          !this.classList.contains("crossed")
-        ) {
-          // Lần 1: Hiển thị dấu tích
-          this.classList.add("checked");
-        } else if (this.classList.contains("checked")) {
-          // Lần 2: Hiển thị dấu X
+      function handleCellClick(e) {
+        const cell = this;
+        if (cell.clickTimeout !== null) {
+          clearTimeout(cell.clickTimeout);
+          cell.clickTimeout = null;
+          return;
+        }
+
+        cell.clickTimeout = setTimeout(function () {
+          if (cell.classList.contains("checked")) {
+            cell.classList.remove("checked");
+          } else if (cell.classList.contains("crossed")) {
+            cell.classList.remove("crossed");
+          } else {
+            cell.classList.add("checked");
+            cell.classList.remove("crossed");
+          }
+          cell.clickTimeout = null;
+        }, 300);
+      }
+
+      // Xử lý sự kiện double click
+      function handleCellDoubleClick(e) {
+        e.preventDefault();
+        if (this.clickTimeout !== null) {
+          clearTimeout(this.clickTimeout);
+          this.clickTimeout = null;
+        }
+
+        if (this.classList.contains("crossed")) {
+          this.classList.remove("crossed");
           this.classList.remove("checked");
-          this.classList.add("crossed");
         } else {
-          // Lần 3: Trở về trạng thái ban đầu
-          resetCell(this);
+          this.classList.add("crossed");
+          this.classList.remove("checked");
         }
       }
 
-      // Reset ô về trạng thái ban đầu
-      function resetCell(cell) {
-        cell.classList.remove("checked");
-        cell.classList.remove("crossed");
+      // Render theme buttons bằng JS
+      function renderThemeButtons() {
+        const themeButtonsContainer = document.getElementById("themeButtons");
+        themes.forEach((theme) => {
+          const button = document.createElement("button");
+          button.className = "theme-button";
+          button.textContent = theme.name;
+          button.dataset.theme = theme.id;
+          if (theme.id === "personality") {
+            button.classList.add("active");
+          }
+          button.addEventListener("click", handleThemeClick);
+          themeButtonsContainer.appendChild(button);
+        });
       }
 
-      // Khởi động ứng dụng
-      document.addEventListener("DOMContentLoaded", initBingoBoard);
+      // Xử lý sự kiện click theme button
+      function handleThemeClick(e) {
+        const buttons = document.querySelectorAll(".theme-button");
+        buttons.forEach((btn) => btn.classList.remove("active"));
+        e.target.classList.add("active");
+        initBingoBoard(e.target.dataset.theme);
+      }
+
+      // Khởi tạo khi trang tải
+      document.addEventListener("DOMContentLoaded", function () {
+        renderThemeButtons();
+        initBingoBoard("personality");
+      });
     </script>
   </body>
 </html>
