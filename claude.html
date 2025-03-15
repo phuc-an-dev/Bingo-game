@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bảng Bingo Tương Tác</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background-color: #f5f5f5;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 15px;
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      .bingo-container {
+        max-width: 100%;
+        width: 500px;
+        margin: 0 auto;
+      }
+
+      .bingo-board {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+
+      .bingo-cell {
+        position: relative;
+        background-color: #fff;
+        border-radius: 10px;
+        padding: 10px;
+        min-height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: 14px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s, background-color 0.2s;
+        user-select: none;
+        cursor: pointer;
+        touch-action: manipulation;
+      }
+
+      .bingo-cell:active {
+        transform: scale(0.97);
+      }
+
+      .bingo-cell.checked::after,
+      .bingo-cell.crossed::after {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        opacity: 0.4;
+        border-radius: 10px;
+      }
+
+      .bingo-cell.checked::after {
+        content: "✔";
+        color: green;
+        background-color: rgba(0, 128, 0, 0.1);
+      }
+
+      .bingo-cell.crossed::after {
+        content: "✘";
+        color: red;
+        background-color: rgba(255, 0, 0, 0.1);
+      }
+
+      .instructions {
+        background-color: #fff;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 15px;
+        width: 100%;
+        max-width: 500px;
+      }
+
+      .instructions h3 {
+        margin-bottom: 10px;
+        color: #333;
+      }
+
+      .instructions ul {
+        padding-left: 20px;
+      }
+
+      .instructions li {
+        margin-bottom: 5px;
+      }
+
+      @media (max-width: 600px) {
+        .bingo-cell {
+          min-height: 60px;
+          padding: 8px;
+          font-size: 12px;
+        }
+
+        h1 {
+          font-size: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Bảng Bingo Tương Tác</h1>
+
+    <div class="instructions">
+      <h3>Hướng dẫn:</h3>
+      <ul>
+        <li>Nhấn 1 lần: Hiển thị dấu tích (✔)</li>
+        <li>Nhấn 2 lần: Hiển thị dấu chéo (✘)</li>
+        <li>Nhấn 3 lần: Trở về trạng thái ban đầu</li>
+      </ul>
+    </div>
+
+    <div class="bingo-container">
+      <div class="bingo-board" id="bingoBoard"></div>
+    </div>
+
+    <script>
+      // Mảng chứa 25 câu hỏi về tính cách và sở thích
+      const questions = [
+        "Thích đi du lịch khám phá",
+        "Thường xuyên đọc sách",
+        "Thích nấu ăn",
+        "Có sở thích chơi thể thao",
+        "Có tính kiên nhẫn cao",
+        "Thích âm nhạc cổ điển",
+        "Thường xuyên tập thể dục",
+        "Là người hướng nội",
+        "Quan tâm đến thời trang",
+        "Thích chơi game",
+        "Có khả năng sáng tạo",
+        "Thích động vật",
+        "Có tính ngăn nắp",
+        "Thích ăn đồ cay",
+        "Thích xem phim",
+        "Có thói quen dậy sớm",
+        "Thích học ngôn ngữ mới",
+        "Quan tâm đến môi trường",
+        "Thích công nghệ mới",
+        "Có khả năng lãnh đạo",
+        "Thích làm việc nhóm",
+        "Thích vẽ hoặc hội họa",
+        "Hay lo lắng về tương lai",
+        "Thích mạo hiểm",
+        "Thích cà phê buổi sáng",
+      ];
+
+      // Trộn mảng câu hỏi
+      function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+      }
+
+      // Khởi tạo bảng bingo
+      function initBingoBoard() {
+        const bingoBoard = document.getElementById("bingoBoard");
+        const shuffledQuestions = shuffleArray([...questions]);
+
+        // Tạo 25 ô bingo
+        for (let i = 0; i < 25; i++) {
+          const cell = document.createElement("div");
+          cell.className = "bingo-cell";
+          cell.textContent = shuffledQuestions[i];
+
+          // Thêm sự kiện click
+          cell.addEventListener("click", handleCellClick);
+
+          // Vô hiệu hóa double-click để tránh phóng to màn hình
+          cell.addEventListener("dblclick", function (e) {
+            e.preventDefault();
+          });
+
+          // Thêm sự kiện nhấn giữ
+          let pressTimer;
+
+          cell.addEventListener("mousedown", function () {
+            pressTimer = setTimeout(() => {
+              resetCell(this);
+            }, 500);
+          });
+
+          cell.addEventListener("mouseup", function () {
+            clearTimeout(pressTimer);
+          });
+
+          cell.addEventListener("touchstart", function (e) {
+            pressTimer = setTimeout(() => {
+              resetCell(this);
+            }, 500);
+          });
+
+          cell.addEventListener("touchend", function (e) {
+            clearTimeout(pressTimer);
+          });
+
+          bingoBoard.appendChild(cell);
+        }
+      }
+
+      // Xử lý sự kiện click vào ô bingo
+      function handleCellClick() {
+        if (
+          !this.classList.contains("checked") &&
+          !this.classList.contains("crossed")
+        ) {
+          // Lần 1: Hiển thị dấu tích
+          this.classList.add("checked");
+        } else if (this.classList.contains("checked")) {
+          // Lần 2: Hiển thị dấu X
+          this.classList.remove("checked");
+          this.classList.add("crossed");
+        } else {
+          // Lần 3: Trở về trạng thái ban đầu
+          resetCell(this);
+        }
+      }
+
+      // Reset ô về trạng thái ban đầu
+      function resetCell(cell) {
+        cell.classList.remove("checked");
+        cell.classList.remove("crossed");
+      }
+
+      // Khởi động ứng dụng
+      document.addEventListener("DOMContentLoaded", initBingoBoard);
+    </script>
+  </body>
+</html>
