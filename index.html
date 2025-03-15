@@ -101,7 +101,6 @@
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         transition: transform 0.2s, background-color 0.2s;
         cursor: pointer;
-        touch-action: manipulation;
       }
 
       .bingo-cell:active {
@@ -309,19 +308,32 @@
           cell.className = "bingo-cell";
           cell.textContent = shuffledQuestions[i];
           cell.clickTimeout = null;
-          cell.addEventListener("touchstart", handleCellTouch);
+          // Sử dụng pointerdown để bắt mọi loại tương tác
+          cell.addEventListener("pointerdown", handlePointerDown);
+          cell.addEventListener("pointerup", handlePointerUp);
           bingoBoard.appendChild(cell);
         }
       }
 
-      // Xử lý sự kiện touch (thay thế click và double click)
-      function handleCellTouch(e) {
-        e.preventDefault(); // Ngăn chặn hành vi zoom khi double tap
+      function handlePointerDown(e) {
+        this.startX = e.clientX;
+        this.startY = e.clientY;
+      }
+
+      function handlePointerUp(e) {
         const cell = this;
+
+        // Kiểm tra nếu người dùng kéo (nếu có kéo, bỏ qua sự kiện click)
+        if (
+          Math.abs(e.clientX - cell.startX) > 10 ||
+          Math.abs(e.clientY - cell.startY) > 10
+        ) {
+          return;
+        }
 
         const now = Date.now();
         if (now - cell.lastTap < 300) {
-          // Nếu double tap trong vòng 300ms -> Đánh dấu chéo
+          // Double tap
           if (cell.classList.contains("crossed")) {
             cell.classList.remove("crossed");
             cell.classList.remove("checked");
@@ -329,9 +341,9 @@
             cell.classList.add("crossed");
             cell.classList.remove("checked");
           }
-          cell.lastTap = 0; // Reset lại thời gian tap
+          cell.lastTap = 0;
         } else {
-          // Nếu chỉ tap một lần -> Đánh dấu
+          // Single tap
           setTimeout(() => {
             if (cell.lastTap !== 0) {
               if (cell.classList.contains("checked")) {
