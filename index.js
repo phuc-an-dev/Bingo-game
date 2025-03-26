@@ -1,19 +1,17 @@
-// Use constants for values that don't change
 const DOUBLE_TAP_THRESHOLD = 200;
 const SINGLE_TAP_DELAY = 200;
 const SWIPE_THRESHOLD = 10;
 const GRID_SIZE = 25;
+const SAVE_DELAY = 300;
 
-// Store DOM references once instead of querying each time
 const elements = {
   bingoBoard: null,
   themeButtons: null,
 };
 
 let currentQuestions = [];
-let activeTheme = "tinh_cach";
+let activeTheme = "suc_khoe";
 
-// Pure function that doesn't modify the original array
 function shuffleArray(array) {
   const newArray = [...array];
   for (let i = newArray.length - 1; i > 0; i--) {
@@ -31,17 +29,22 @@ function createBingoCell(question) {
   const cell = document.createElement("div");
   cell.className = "bingo-cell";
   cell.textContent = question;
-
-  // Use object to store cell state instead of DOM properties
   const state = {
     lastTap: 0,
     startX: 0,
     startY: 0,
   };
-
-  cell.addEventListener("pointerdown", (e) => handlePointerDown(e, state));
-  cell.addEventListener("pointerup", (e) => handlePointerUp(e, cell, state));
-
+  cell.addEventListener("pointerdown", (e) => {
+    cell.classList.add("tap-effect");
+    handlePointerDown(e, state);
+  });
+  cell.addEventListener("pointerup", (e) => {
+    cell.classList.remove("tap-effect");
+    handlePointerUp(e, cell, state);
+  });
+  cell.addEventListener("pointercancel", () => {
+    cell.classList.remove("tap-effect");
+  });
   return cell;
 }
 
@@ -51,7 +54,6 @@ function handlePointerDown(e, state) {
 }
 
 function handlePointerUp(e, cell, state) {
-  // Check if this was a swipe rather than a tap
   if (
     Math.abs(e.clientX - state.startX) > SWIPE_THRESHOLD ||
     Math.abs(e.clientY - state.startY) > SWIPE_THRESHOLD
@@ -60,13 +62,10 @@ function handlePointerUp(e, cell, state) {
   }
 
   const now = Date.now();
-
-  // Double tap detection
   if (now - state.lastTap < DOUBLE_TAP_THRESHOLD) {
     toggleCellState(cell, "crossed");
     state.lastTap = 0;
   } else {
-    // Single tap with delay to allow for double tap
     setTimeout(() => {
       if (state.lastTap !== 0) {
         toggleCellState(cell, "checked");
@@ -76,12 +75,10 @@ function handlePointerUp(e, cell, state) {
 
     state.lastTap = now;
   }
+  setTimeout(saveBoardState, SAVE_DELAY);
 }
 
 function toggleCellState(cell, newState) {
-  console.log("newState", newState);
-  console.log("cell.classList", cell.classList);
-
   if (
     newState === "checked" &&
     (cell.classList.contains("checked") || cell.classList.contains("crossed"))
@@ -89,8 +86,6 @@ function toggleCellState(cell, newState) {
     cell.classList.remove("checked", "crossed");
     return;
   }
-
-  // Only add the new state if the cell doesn't already have it
   if (newState === "checked" && !cell.classList.contains("checked")) {
     cell.classList.add("checked");
   } else if (newState === "crossed" && !cell.classList.contains("crossed")) {
@@ -98,50 +93,76 @@ function toggleCellState(cell, newState) {
   }
 }
 
+function saveBoardState() {
+  if (!activeTheme) return;
+  const boardState = Array.from(elements.bingoBoard.children).map((cell) => ({
+    text: cell.textContent,
+    checked: cell.classList.contains("checked"),
+    crossed: cell.classList.contains("crossed"),
+  }));
+  localStorage.setItem(
+    `bingo_board_${activeTheme}`,
+    JSON.stringify(boardState)
+  );
+}
+
+function loadBoardState() {
+  const savedState = localStorage.getItem(`bingo_board_${activeTheme}`);
+  if (savedState) {
+    const boardState = JSON.parse(savedState);
+    const cells = elements.bingoBoard.children;
+    boardState.forEach((cellState, index) => {
+      if (index < cells.length) {
+        const cell = cells[index];
+        cell.textContent = cellState.text;
+        cell.classList.remove("checked", "crossed");
+        if (cellState.checked) cell.classList.add("checked");
+        if (cellState.crossed) cell.classList.add("crossed");
+      }
+    });
+  }
+}
+
 function initBingoBoard(theme) {
   clearBingoBoard();
   activeTheme = theme;
-
-  // Get questions for the selected theme with a fallback
   currentQuestions = questionSets[theme] || questionSets.tinh_cach;
-
-  // Only shuffle the number of questions we need
-  const shuffledQuestions = shuffleArray(currentQuestions).slice(0, GRID_SIZE);
-
-  // Create a document fragment to improve performance when adding multiple elements
+  const shuffledQuestions = shuffleArray(currentQuestions);
   const fragment = document.createDocumentFragment();
-
-  for (let i = 0; i < GRID_SIZE; i++) {
+  for (let i = 0; i < currentQuestions.length; i++) {
     const cell = createBingoCell(shuffledQuestions[i]);
     fragment.appendChild(cell);
   }
-
   elements.bingoBoard.appendChild(fragment);
+  loadBoardState();
 }
 
 function renderThemeButtons() {
-  // Use document fragment for better performance
   const fragment = document.createDocumentFragment();
-
   themes.forEach((theme) => {
+    const themeContainer = document.createElement("div");
+    themeContainer.className = "theme-container";
     const button = document.createElement("button");
     button.className = "theme-button";
     button.textContent = theme.name;
     button.dataset.theme = theme.id;
-
     if (theme.id === activeTheme) {
       button.classList.add("active");
     }
-
     button.addEventListener("click", handleThemeClick);
-    fragment.appendChild(button);
+    const resetButton = document.createElement("button");
+    resetButton.className = "reset-button";
+    resetButton.innerHTML = "&#x21bb;";
+    resetButton.dataset.theme = theme.id;
+    resetButton.addEventListener("click", handleResetClick);
+    themeContainer.appendChild(button);
+    themeContainer.appendChild(resetButton);
+    fragment.appendChild(themeContainer);
   });
-
   elements.themeButtons.appendChild(fragment);
 }
 
 function handleThemeClick(e) {
-  // Update active button styling
   document
     .querySelectorAll(".theme-button")
     .forEach((btn) =>
@@ -150,17 +171,18 @@ function handleThemeClick(e) {
         btn.dataset.theme === e.target.dataset.theme
       )
     );
-
-  // Initialize board with new theme
   initBingoBoard(e.target.dataset.theme);
 }
 
-// Initialize everything when DOM is ready
+function handleResetClick(e) {
+  const theme = e.target.dataset.theme;
+  localStorage.removeItem(`bingo_board_${theme}`);
+  initBingoBoard(theme);
+}
+
 document.addEventListener("DOMContentLoaded", function () {
-  // Cache DOM elements
   elements.bingoBoard = document.getElementById("bingoBoard");
   elements.themeButtons = document.getElementById("themeButtons");
-
   renderThemeButtons();
   initBingoBoard(activeTheme);
 });

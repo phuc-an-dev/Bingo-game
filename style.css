@@ -23,7 +23,6 @@ h1 {
 
 .theme-selector {
   background-color: #fff;
-  padding: 15px;
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 15px;
@@ -38,20 +37,36 @@ h1 {
 }
 
 .theme-buttons {
+  padding: 15px;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  justify-content: start;
   gap: 10px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+/* Webkit (Chrome, Safari) scrollbar hiding */
+.theme-buttons::-webkit-scrollbar {
+  display: none;
+}
+
+.theme-container {
+  display: flex;
+  flex-shrink: 0; /* Prevent items from shrinking */
 }
 
 .theme-button {
   padding: 8px 15px;
   background-color: #4caf50;
   color: white;
-  border: none;
-  border-radius: 5px;
+  border: 1px solid transparent;
+  border-radius: 10px 0 0 10px;
+  min-width: 80px;
   cursor: pointer;
   transition: background-color 0.3s;
+  white-space: nowrap; /* Prevent text wrapping */
 }
 
 .theme-button:hover {
@@ -61,6 +76,23 @@ h1 {
 .theme-button.active {
   background-color: #2e7d32;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.reset-button {
+  background-color: #f0f0f0;
+  border: 1px solid transparent;
+  border-radius: 0 10px 10px 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.reset-button:hover {
+  background-color: #e0e0e0;
 }
 
 .bingo-container {
@@ -124,11 +156,17 @@ h1 {
   background-color: rgba(255, 0, 0, 0.1);
 }
 
+.bingo-cell.tap-effect {
+  transform: scale(0.3);
+  opacity: 0.5;
+  transition: transform 0.1s, opacity 0.1s;
+}
+
 @media (max-width: 600px) {
   .bingo-cell {
     min-height: 60px;
     padding: 8px;
-    font-size: 12px;
+    font-size: 10px;
   }
 
   h1 {
