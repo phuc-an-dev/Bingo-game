@@ -184,7 +184,7 @@ async function getSheetData(retries = 3) {
   try {
     const spreadsheetId = "1FRs4QTxh03H3l4R7V4vZTQO2vGWsHUzjP_-bNHdvWu0";
     const sheetName = "data";
-    const range = "A1:F70";
+    const range = "A1:O71";
     const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}&range=${range}`;
     const response = await fetch(url);
     if (!response.ok) throw new Error("Network response was not ok");
