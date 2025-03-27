@@ -10,7 +10,9 @@ const elements = {
 };
 
 let currentQuestions = [];
-let activeTheme = "suc_khoe";
+let activeTheme = "1";
+let themes = [];
+let questionSets = {};
 
 function shuffleArray(array) {
   const newArray = [...array];
@@ -60,7 +62,6 @@ function handlePointerUp(e, cell, state) {
   ) {
     return;
   }
-
   const now = Date.now();
   if (now - state.lastTap < DOUBLE_TAP_THRESHOLD) {
     toggleCellState(cell, "crossed");
@@ -72,7 +73,6 @@ function handlePointerUp(e, cell, state) {
         state.lastTap = 0;
       }
     }, SINGLE_TAP_DELAY);
-
     state.lastTap = now;
   }
   setTimeout(saveBoardState, SAVE_DELAY);
@@ -126,11 +126,11 @@ function loadBoardState() {
 function initBingoBoard(theme) {
   clearBingoBoard();
   activeTheme = theme;
-  currentQuestions = questionSets[theme] || questionSets.tinh_cach;
+  currentQuestions = questionSets[theme] || questionSets[0];
   const shuffledQuestions = shuffleArray(currentQuestions);
   const fragment = document.createDocumentFragment();
-  for (let i = 0; i < currentQuestions.length; i++) {
-    const cell = createBingoCell(shuffledQuestions[i]);
+  for (const element of shuffledQuestions) {
+    const cell = createBingoCell(element);
     fragment.appendChild(cell);
   }
   elements.bingoBoard.appendChild(fragment);
@@ -180,9 +180,51 @@ function handleResetClick(e) {
   initBingoBoard(theme);
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+async function getSheetData(retries = 3) {
+  try {
+    const spreadsheetId = "1FRs4QTxh03H3l4R7V4vZTQO2vGWsHUzjP_-bNHdvWu0";
+    const sheetName = "data";
+    const range = "A1:F70";
+    const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}&range=${range}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Network response was not ok");
+    const text = await response.text();
+    const jsonData = JSON.parse(
+      text.replace(
+        /.*google\.visualization\.Query\.setResponse\((.*)\);.*/s,
+        "$1"
+      )
+    );
+    const rows = jsonData.table.rows;
+    const data = rows.map((row) => row.c.map((cell) => (cell ? cell.v : "")));
+
+    themes = data[0].map((theme, index) => ({ id: index, name: theme }));
+    for (let i = 1; i < data.length; i++) {
+      for (let j = 0; j < data[0].length; j++) {
+        if (!questionSets[j]) {
+          questionSets[j] = [];
+        }
+        if (data[i][j]) {
+          questionSets[j].push(data[i][j]);
+        }
+      }
+    }
+    renderThemeButtons();
+    initBingoBoard(activeTheme);
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    if (retries > 0) {
+      console.log(`Retrying... ${retries} attempts left`);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await getSheetData(retries - 1);
+    } else {
+      console.error("Failed to fetch data after multiple attempts");
+    }
+  }
+}
+
+document.addEventListener("DOMContentLoaded", async function () {
   elements.bingoBoard = document.getElementById("bingoBoard");
   elements.themeButtons = document.getElementById("themeButtons");
-  renderThemeButtons();
-  initBingoBoard(activeTheme);
+  await getSheetData();
 });
