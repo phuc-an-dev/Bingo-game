@@ -198,7 +198,10 @@ async function getSheetData(retries = 3) {
     const rows = jsonData.table.rows;
     const data = rows.map((row) => row.c.map((cell) => (cell ? cell.v : "")));
 
-    themes = data[0].map((theme, index) => ({ id: index, name: theme }));
+    themes = data[0]
+      .filter((theme) => theme)
+      .map((theme, index) => ({ id: index, name: theme }));
+
     for (let i = 1; i < data.length; i++) {
       for (let j = 0; j < data[0].length; j++) {
         if (!questionSets[j]) {
