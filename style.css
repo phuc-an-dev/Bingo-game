@@ -43,13 +43,7 @@ h1 {
   gap: 10px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
-  scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* Internet Explorer 10+ */
-}
-
-/* Webkit (Chrome, Safari) scrollbar hiding */
-.theme-buttons::-webkit-scrollbar {
-  display: none;
 }
 
 .theme-container {
@@ -168,6 +162,15 @@ h1 {
     min-height: 60px;
     padding: 8px;
     font-size: 12px;
+  }
+
+  .theme-buttons {
+    scrollbar-width: none; /* Firefox */
+  }
+
+  /* Webkit (Chrome, Safari) scrollbar hiding */
+  .theme-buttons::-webkit-scrollbar {
+    display: none;
   }
 
   h1 {
