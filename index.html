@@ -1,31 +1,589 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      href="./img/TMG_theme_of_year/theme_of_year.jpg"
-    />
-
-    <title>Để mình hiểu nhau hơn</title>
-    <link rel="stylesheet" href="./style.css?v=27.03.01_p2344" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Bingo Game</title>
+    <link rel="icon" type="image/png" href="./img/TMG_theme_of_year/theme_of_year.jpg" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/1/1.0.7/iconify.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap" rel="stylesheet" />
+    <style>
+      body {
+        font-family: 'Nunito Sans', sans-serif;
+        touch-action: manipulation;
+        padding-bottom: 80px;
+      }
+      .nav-active {
+        color: #f97316;
+        background-color: #fff7ed;
+      }
+      .bingo-cell {
+        aspect-ratio: 1/1;
+        transition: all 0.3s ease;
+        position: relative;
+      }
+      .bingo-cell.selected-green {
+        background-color: #22c55e;
+        color: white;
+      }
+      .bingo-cell.selected-red {
+        background-color: #ef4444;
+        color: white;
+      }
+      .theme-btn {
+        transition: all 0.3s ease;
+      }
+      .theme-btn.active {
+        background-color: #f97316;
+        color: white;
+      }
+      .section {
+        display: none;
+      }
+      .section.active {
+        display: block;
+      }
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+      .modal.active {
+        opacity: 1;
+        visibility: visible;
+      }
+      .modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 320px;
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+      }
+      .modal.active .modal-content {
+        transform: scale(1);
+      }
+      .image-modal-content {
+        background-color: white;
+        padding: 10px;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 400px;
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+      }
+      .modal.active .image-modal-content {
+        transform: scale(1);
+      }
+      .gallery-item {
+        aspect-ratio: 1/1;
+        transition: transform 0.2s ease;
+        cursor: pointer;
+      }
+      .gallery-item:active {
+        transform: scale(0.95);
+      }
+      .state-toggle {
+        display: flex;
+        gap: 8px;
+        margin-top: 5px;
+      }
+      .state-btn {
+        flex: 1;
+        border-radius: 4px;
+        padding: 6px;
+        font-size: 10px;
+        text-align: center;
+        transition: all 0.2s ease;
+      }
+    </style>
   </head>
-  <body>
-    <h1>Để mình hiểu nhau hơn</h1>
+  <body class="bg-orange-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm py-4 px-4 fixed top-0 left-0 right-0 z-10">
+      <div class="flex justify-between items-center">
+        <h1 class="text-xl font-bold text-orange-500">Bingo Game</h1>
+        <div class="flex gap-3">
+          <button id="qr-btn" class="bg-orange-100 text-orange-500 p-2 rounded-xl">
+            <span class="iconify" data-icon="solar:qr-code-linear" width="20" height="20"></span>
+          </button>
+          <button id="reset-btn" class="bg-orange-100 text-orange-500 px-3 py-1 rounded-lg text-sm">Reset</button>
+        </div>
+      </div>
+    </header>
 
-    <div class="theme-selector">
-      <div class="theme-buttons" id="themeButtons"></div>
+    <!-- Main Content -->
+    <main class="pt-24 px-4">
+      <!-- Theme Section -->
+      <section id="theme-section" class="section pb-6">
+        <div class="mb-4">
+          <h2 class="text-lg font-semibold text-gray-800 mb-2">Select Theme</h2>
+          <p class="text-sm text-gray-600">Choose a theme for your bingo game</p>
+        </div>
+        <div id="theme-buttons" class="grid grid-cols-2 gap-2">
+          <!-- Theme buttons will be populated here -->
+        </div>
+      </section>
+
+      <!-- Game Section -->
+      <section id="game-section" class="section active pb-6">
+        <div class="mb-4">
+          <h2 class="text-lg font-semibold text-gray-800 mb-1" id="active-theme-title">Theme: Default</h2>
+          <p class="text-sm text-gray-600">Tap items and select status below</p>
+        </div>
+        <div id="bingo-board" class="grid grid-cols-5 gap-1">
+          <!-- Bingo cells will be populated here -->
+        </div>
+      </section>
+
+      <!-- Gallery Section -->
+      <section id="gallery-section" class="section pb-6">
+        <div class="mb-4">
+          <h2 class="text-lg font-semibold text-gray-800 mb-2">Bingo Gallery</h2>
+          <p class="text-sm text-gray-600">Your saved bingo cards</p>
+        </div>
+        <div id="gallery-grid" class="grid grid-cols-3 gap-2">
+          <div class="gallery-item bg-white rounded shadow-sm overflow-hidden">
+            <img src="/img/TMG_sub_group/1.jpg" alt="Bingo Card" class="w-full h-full object-cover" />
+          </div>
+          <div class="gallery-item bg-white rounded shadow-sm overflow-hidden">
+            <img src="/img/TMG_sub_group/2.jpg" alt="Bingo Card" class="w-full h-full object-cover" />
+          </div>
+          <div class="gallery-item bg-white rounded shadow-sm overflow-hidden">
+            <img src="/img/TMG_sub_group/3.jpg" alt="Bingo Card" class="w-full h-full object-cover" />
+          </div>
+          <div class="gallery-item bg-white rounded shadow-sm overflow-hidden">
+            <img src="/img/TMG_sub_group/4.jpg" alt="Bingo Card" class="w-full h-full object-cover" />
+          </div>
+          <div class="gallery-item bg-white rounded shadow-sm overflow-hidden">
+            <img src="/img/TMG_sub_group/5.jpg" alt="Bingo Card" class="w-full h-full object-cover" />
+          </div>
+          <div class="gallery-item bg-white rounded shadow-sm overflow-hidden">
+            <img src="/img/TMG_sub_group/6.jpg" alt="Bingo Card" class="w-full h-full object-cover" />
+          </div>
+          <div class="gallery-item bg-white rounded shadow-sm overflow-hidden">
+            <img src="/img/TMG_sub_group/7.jpg" alt="Bingo Card" class="w-full h-full object-cover" />
+          </div>
+          <div class="gallery-item bg-white rounded shadow-sm overflow-hidden">
+            <img src="/img/TMG_sub_group/8.jpg" alt="Bingo Card" class="w-full h-full object-cover" />
+          </div>
+          <div class="gallery-item bg-white rounded shadow-sm overflow-hidden">
+            <img src="/img/TMG_sub_group/9.jpg" alt="Bingo Card" class="w-full h-full object-cover" />
+          </div>
+          <div class="gallery-item bg-white rounded shadow-sm overflow-hidden">
+            <img src="/img/TMG_sub_group/10.jpg" alt="Bingo Card" class="w-full h-full object-cover" />
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- QR Code Modal -->
+    <div id="qr-modal" class="modal">
+      <div class="modal-content">
+        <div class="flex justify-between items-center mb-4">
+          <button class="p-1 close-modal"></button>
+        </div>
+        <div class="flex justify-center mb-4">
+          <img src="/img/qr_code/qr_code.png" alt="QR Code" />
+        </div>
+      </div>
     </div>
 
-    <div class="bingo-container">
-      <div class="bingo-board" id="bingoBoard"></div>
+    <!-- Image Modal -->
+    <div id="image-modal" class="modal">
+      <div class="image-modal-content">
+        <div class="flex justify-between items-center mb-2">
+          <button class="p-1 close-modal"></button>
+        </div>
+        <img id="modal-image" src="" alt="Bingo Card" class="w-full rounded-lg" />
+        <div class="mt-2 flex justify-between">
+          <p class="text-sm text-gray-500">Created: <span id="image-date">April 9, 2025</span></p>
+        </div>
+      </div>
     </div>
 
-    <script src="./index.js?v=27.03.01_p2344"></script>
+    <!-- Cell Status Modal -->
+    <div id="cell-state-modal" class="modal">
+      <div class="modal-content py-4">
+        <div class="text-center mb-3">
+          <h3 class="font-medium text-lg text-gray-800 py-4" id="cell-content-display">Cell Content</h3>
+        </div>
+        <div class="flex justify-center gap-4">
+          <button class="state-btn bg-white border border-gray-200 hover:bg-gray-100 rounded-xl" id="state-none">
+            <div class="w-8 h-8 mx-auto mb-1 bg-white border border-gray-300 rounded-full"></div>
+          </button>
+          <button class="state-btn bg-white border border-gray-200 hover:bg-gray-100 rounded-xl" id="state-green">
+            <div class="w-8 h-8 mx-auto mb-1 bg-green-500 rounded-full"></div>
+          </button>
+          <button class="state-btn bg-white border border-gray-200 hover:bg-gray-100 rounded-xl" id="state-red">
+            <div class="w-8 h-8 mx-auto mb-1 bg-red-500 rounded-full"></div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white shadow-lg rounded-t-xl p-2">
+      <div class="flex justify-around">
+        <button class="nav-item flex flex-col items-center transition-all p-2 rounded-lg" data-section="theme">
+          <span class="iconify" data-icon="solar:documents-minimalistic-outline" width="20" height="20"></span>
+          <span class="text-xs mt-1">Theme</span>
+        </button>
+        <button class="nav-item flex flex-col items-center transition-all p-2 rounded-lg nav-active" data-section="game">
+          <span class="iconify" data-icon="solar:widget-outline" width="20" height="20"></span>
+          <span class="text-xs mt-1">Game</span>
+        </button>
+        <button class="nav-item flex flex-col items-center transition-all p-2 rounded-lg" data-section="gallery">
+          <span class="iconify" data-icon="solar:gallery-round-linear" width="20" height="20"></span>
+          <span class="text-xs mt-1">Gallery</span>
+        </button>
+      </div>
+    </nav>
+
+    <script>
+      // Global variables
+      let themes = [];
+      let questionSets = {};
+      let activeTheme = 0;
+      let savedBoards = [];
+      let cellStates = {};
+      let activeCellIndex = null;
+
+      // Fetch data from Google Sheet
+      async function getSheetData(retries = 3) {
+        try {
+          const spreadsheetId = '1FRs4QTxh03H3l4R7V4vZTQO2vGWsHUzjP_-bNHdvWu0';
+          const sheetName = 'data';
+          const range = 'A1:AF26';
+          const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}&range=${range}`;
+          const response = await fetch(url);
+          if (!response.ok) throw new Error('Network response was not ok');
+          const text = await response.text();
+          const jsonData = JSON.parse(text.replace(/.*google\.visualization\.Query\.setResponse\((.*)\);.*/s, '$1'));
+          const rows = jsonData.table.rows;
+          const data = rows.map((row) => row.c.map((cell) => (cell ? cell.v : '')));
+
+          themes = data[0].filter((theme) => theme).map((theme, index) => ({ id: index, name: theme }));
+
+          for (let i = 1; i < data.length; i++) {
+            for (let j = 0; j < data[0].length; j++) {
+              if (!questionSets[j]) {
+                questionSets[j] = [];
+              }
+              if (data[i][j]) {
+                questionSets[j].push(data[i][j]);
+              }
+            }
+          }
+
+          // Load active theme from localStorage if available
+          const savedTheme = localStorage.getItem('activeTheme');
+          if (savedTheme !== null) {
+            activeTheme = parseInt(savedTheme);
+          }
+
+          renderThemeButtons();
+          initBingoBoard(activeTheme);
+          initGallery();
+        } catch (error) {
+          console.error('Error fetching data:', error);
+          if (retries > 0) {
+            console.log(`Retrying... ${retries} attempts left`);
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            await getSheetData(retries - 1);
+          } else {
+            console.error('Failed to fetch data after multiple attempts');
+          }
+        }
+      }
+
+      // Render theme buttons
+      function renderThemeButtons() {
+        const themeButtonsContainer = document.getElementById('theme-buttons');
+        themeButtonsContainer.innerHTML = '';
+
+        themes.forEach((theme) => {
+          const button = document.createElement('button');
+          button.className = `theme-btn p-4 border rounded-xl text-left bg-white border-gray-200 ${activeTheme === theme.id ? 'active' : ''}`;
+          button.innerHTML = `
+          <h3 class="font-medium">${theme.name}</h3>
+        `;
+          button.addEventListener('click', () => {
+            document.querySelectorAll('.theme-btn').forEach((btn) => btn.classList.remove('active'));
+            button.classList.add('active');
+            activeTheme = theme.id;
+            // Save to localStorage
+            localStorage.setItem('activeTheme', theme.id);
+            initBingoBoard(theme.id);
+            document.getElementById('active-theme-title').textContent = `Theme: ${theme.name}`;
+            switchSection('game');
+          });
+          themeButtonsContainer.appendChild(button);
+        });
+      }
+
+      // Initialize bingo board
+      function initBingoBoard(themeId) {
+        const bingoBoard = document.getElementById('bingo-board');
+        bingoBoard.innerHTML = '';
+        cellStates = {};
+
+        // Try to load cell states from localStorage
+        const savedCellStates = localStorage.getItem(`cellStates_${themeId}`);
+        if (savedCellStates) {
+          cellStates = JSON.parse(savedCellStates);
+        }
+
+        let questions = [...(questionSets[themeId] || [])];
+
+        // Handle case where there aren't enough questions
+        while (questions.length < 25) {
+          questions.push(`Item ${questions.length + 1}`);
+        }
+
+        // Check if we have a saved board for this theme
+        const savedBoard = localStorage.getItem(`boardItems_${themeId}`);
+        let boardItems;
+
+        if (savedBoard) {
+          boardItems = JSON.parse(savedBoard);
+        } else {
+          // Fisher-Yates shuffle algorithm
+          for (let i = questions.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [questions[i], questions[j]] = [questions[j], questions[i]];
+          }
+
+          // Pick 25 items for the board
+          boardItems = questions.slice(0, 25);
+          // Save to localStorage
+          localStorage.setItem(`boardItems_${themeId}`, JSON.stringify(boardItems));
+        }
+
+        // Create the cells
+        boardItems.forEach((item, index) => {
+          const cell = document.createElement('div');
+          const stateClass = cellStates[index] === 1 ? 'selected-green' : cellStates[index] === 2 ? 'selected-red' : '';
+
+          cell.className = `bingo-cell flex items-center justify-center p-1 bg-white border rounded-xl shadow-sm text-center h-full w-full ${stateClass}`;
+          cell.dataset.index = index;
+          cell.dataset.content = item;
+
+          const content = document.createElement('p');
+          content.className = 'text-sm leading-tight';
+          content.textContent = item;
+
+          cell.appendChild(content);
+
+          cell.addEventListener('click', () => showCellStateModal(cell));
+          bingoBoard.appendChild(cell);
+
+          // Initialize cell state if not already set
+          if (cellStates[index] === undefined) {
+            cellStates[index] = 0; // 0 = unselected, 1 = green, 2 = red
+          }
+        });
+
+        // If it's the active theme, update the title
+        if (themes[themeId]) {
+          document.getElementById('active-theme-title').textContent = `Theme: ${themes[themeId].name}`;
+        }
+      }
+
+      // Initialize gallery
+      function initGallery() {
+        const galleryGrid = document.getElementById('gallery-grid');
+        const galleryItems = galleryGrid.querySelectorAll('.gallery-item');
+
+        galleryItems.forEach((item) => {
+          item.addEventListener('click', () => {
+            const imageModal = document.getElementById('image-modal');
+            const modalImage = document.getElementById('modal-image');
+            modalImage.src = item.querySelector('img').src;
+            imageModal.classList.add('active');
+          });
+        });
+      }
+
+      // Show cell state modal
+      function showCellStateModal(cell) {
+        const cellStateModal = document.getElementById('cell-state-modal');
+        const cellContentDisplay = document.getElementById('cell-content-display');
+
+        activeCellIndex = cell.dataset.index;
+        cellContentDisplay.textContent = cell.dataset.content;
+
+        cellStateModal.classList.add('active');
+      }
+
+      // Set cell state
+      function setCellState(state) {
+        if (activeCellIndex === null) return;
+
+        const cell = document.querySelector(`.bingo-cell[data-index="${activeCellIndex}"]`);
+        if (!cell) return;
+
+        cell.classList.remove('selected-green', 'selected-red');
+
+        cellStates[activeCellIndex] = state;
+
+        if (state === 1) {
+          cell.classList.add('selected-green');
+        } else if (state === 2) {
+          cell.classList.add('selected-red');
+        }
+
+        // Save to localStorage
+        localStorage.setItem(`cellStates_${activeTheme}`, JSON.stringify(cellStates));
+
+        closeModals();
+        checkForBingo();
+      }
+
+      // Check for bingo (win detection)
+      function checkForBingo() {
+        // Get all green cells
+        const chooseCells = Object.keys(cellStates).filter((key) => cellStates[key] === 1 || cellStates[key] === 2);
+
+        // Horizontal rows
+        for (let i = 0; i < 5; i++) {
+          if ([0, 1, 2, 3, 4].every((j) => chooseCells.includes((i * 5 + j).toString()))) {
+            celebrateBingo();
+            return;
+          }
+        }
+
+        // Vertical columns
+        for (let i = 0; i < 5; i++) {
+          if ([0, 1, 2, 3, 4].every((j) => chooseCells.includes((j * 5 + i).toString()))) {
+            celebrateBingo();
+            return;
+          }
+        }
+
+        // Diagonals
+        if ([0, 6, 12, 18, 24].every((i) => chooseCells.includes(i.toString()))) {
+          celebrateBingo();
+          return;
+        }
+
+        if ([4, 8, 12, 16, 20].every((i) => chooseCells.includes(i.toString()))) {
+          celebrateBingo();
+          return;
+        }
+      }
+
+      // Celebrate bingo win
+      function celebrateBingo() {
+        // Simple celebration
+        alert('BINGO! You won!');
+        // Save current board to gallery
+        saveToGallery();
+      }
+
+      // Save current board to gallery
+      function saveToGallery() {
+        // Implementation would create a thumbnail of the current board
+        // and save it to localStorage
+        console.log('Saving board to gallery');
+      }
+
+      // Switch between sections
+      function switchSection(sectionId) {
+        document.querySelectorAll('.section').forEach((section) => {
+          section.classList.remove('active');
+        });
+        document.getElementById(`${sectionId}-section`).classList.add('active');
+
+        document.querySelectorAll('.nav-item').forEach((item) => {
+          item.classList.remove('nav-active');
+        });
+        document.querySelector(`.nav-item[data-section="${sectionId}"]`).classList.add('nav-active');
+      }
+
+      // Close all modals
+      function closeModals() {
+        document.querySelectorAll('.modal').forEach((modal) => {
+          modal.classList.remove('active');
+        });
+        activeCellIndex = null;
+      }
+
+      // Reset game
+      document.getElementById('reset-btn').addEventListener('click', () => {
+        // Clear localStorage for this theme
+        localStorage.removeItem(`cellStates_${activeTheme}`);
+        localStorage.removeItem(`boardItems_${activeTheme}`);
+        initBingoBoard(activeTheme);
+      });
+
+      // QR Code button
+      document.getElementById('qr-btn').addEventListener('click', () => {
+        document.getElementById('qr-modal').classList.add('active');
+      });
+
+      // Close modal when clicking close buttons
+      document.querySelectorAll('.close-modal').forEach((btn) => {
+        btn.addEventListener('click', closeModals);
+      });
+
+      // Close modal when clicking outside
+      document.querySelectorAll('.modal').forEach((modal) => {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            closeModals();
+          }
+        });
+      });
+
+      // Cell state buttons
+      document.getElementById('state-none').addEventListener('click', () => setCellState(0));
+      document.getElementById('state-green').addEventListener('click', () => setCellState(1));
+      document.getElementById('state-red').addEventListener('click', () => setCellState(2));
+
+      // Navigation handling
+      document.querySelectorAll('.nav-item').forEach((item) => {
+        item.addEventListener('click', () => {
+          const section = item.dataset.section;
+          switchSection(section);
+        });
+      });
+
+      // Initialize the application
+      document.addEventListener('DOMContentLoaded', () => {
+        getSheetData();
+
+        // Prevent double tap zoom
+        document.addEventListener(
+          'touchend',
+          (e) => {
+            const now = Date.now();
+            const lastTouch = e.target.dataset.lastTouch || 0;
+            const delta = now - lastTouch;
+
+            if (delta < 500 && delta > 0) {
+              e.preventDefault();
+            }
+
+            e.target.dataset.lastTouch = now;
+          },
+          false
+        );
+      });
+    </script>
   </body>
 </html>
