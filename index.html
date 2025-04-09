@@ -65,8 +65,6 @@
         visibility: visible;
       }
       .modal-content {
-        background-color: white;
-        padding: 20px;
         border-radius: 12px;
         width: 90%;
         max-width: 320px;
@@ -89,7 +87,6 @@
         transform: scale(1);
       }
       .gallery-item {
-        aspect-ratio: 1/1;
         transition: transform 0.2s ease;
         cursor: pointer;
       }
@@ -130,8 +127,8 @@
       <!-- Theme Section -->
       <section id="theme-section" class="section pb-6">
         <div class="mb-4">
-          <h2 class="text-lg font-semibold text-gray-800 mb-2">Select Theme</h2>
-          <p class="text-sm text-gray-600">Choose a theme for your bingo game</p>
+          <h2 class="text-lg font-semibold text-gray-800 mb-2">Select Topic</h2>
+          <p class="text-sm text-gray-600">Choose a topic for your bingo game</p>
         </div>
         <div id="theme-buttons" class="grid grid-cols-2 gap-2">
           <!-- Theme buttons will be populated here -->
@@ -141,7 +138,7 @@
       <!-- Game Section -->
       <section id="game-section" class="section active pb-6">
         <div class="mb-4">
-          <h2 class="text-lg font-semibold text-gray-800 mb-1" id="active-theme-title">Theme: Default</h2>
+          <h2 class="text-lg font-semibold text-gray-800 mb-1" id="active-theme-title">Topic: Default</h2>
           <p class="text-sm text-gray-600">Tap items and select status below</p>
         </div>
         <div id="bingo-board" class="grid grid-cols-5 gap-1">
@@ -153,7 +150,6 @@
       <section id="gallery-section" class="section pb-6">
         <div class="mb-4">
           <h2 class="text-lg font-semibold text-gray-800 mb-2">Bingo Gallery</h2>
-          <p class="text-sm text-gray-600">Your saved bingo cards</p>
         </div>
         <div id="gallery-grid" class="grid grid-cols-3 gap-2">
           <div class="gallery-item bg-white rounded shadow-sm overflow-hidden">
@@ -259,17 +255,17 @@
     <div id="cell-state-modal" class="modal">
       <div class="modal-content py-4">
         <div class="text-center mb-3">
-          <h3 class="font-medium text-lg text-gray-800 py-4" id="cell-content-display">Cell Content</h3>
+          <h3 class="font-medium text-lg text-gray-800 py-10 bg-white rounded-xl" id="cell-content-display">Cell Content</h3>
         </div>
         <div class="flex justify-center gap-4">
           <button class="state-btn bg-white border border-gray-200 hover:bg-gray-100 rounded-xl" id="state-none">
-            <div class="w-8 h-8 mx-auto mb-1 bg-white border border-gray-300 rounded-full"></div>
+            <div class="h-10 opacity-75 mx-auto bg-white border border-gray-300 rounded-lg"></div>
           </button>
           <button class="state-btn bg-white border border-gray-200 hover:bg-gray-100 rounded-xl" id="state-green">
-            <div class="w-8 h-8 mx-auto mb-1 bg-green-500 rounded-full"></div>
+            <div class="h-10 opacity-75 mx-auto bg-green-500 rounded-lg"></div>
           </button>
           <button class="state-btn bg-white border border-gray-200 hover:bg-gray-100 rounded-xl" id="state-red">
-            <div class="w-8 h-8 mx-auto mb-1 bg-red-500 rounded-full"></div>
+            <div class="h-10 opacity-75 mx-auto bg-red-500 rounded-lg"></div>
           </button>
         </div>
       </div>
@@ -280,7 +276,7 @@
       <div class="flex justify-around">
         <button class="nav-item flex flex-col items-center transition-all p-2 rounded-lg" data-section="theme">
           <span class="iconify" data-icon="solar:documents-minimalistic-outline" width="20" height="20"></span>
-          <span class="text-xs mt-1">Theme</span>
+          <span class="text-xs mt-1">Topic</span>
         </button>
         <button class="nav-item flex flex-col items-center transition-all p-2 rounded-lg nav-active" data-section="game">
           <span class="iconify" data-icon="solar:widget-outline" width="20" height="20"></span>
@@ -307,7 +303,7 @@
         try {
           const spreadsheetId = '1FRs4QTxh03H3l4R7V4vZTQO2vGWsHUzjP_-bNHdvWu0';
           const sheetName = 'data';
-          const range = 'A1:AF26';
+          const range = 'A1:AQ26';
           const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}&range=${range}`;
           const response = await fetch(url);
           if (!response.ok) throw new Error('Network response was not ok');
@@ -359,7 +355,7 @@
           const button = document.createElement('button');
           button.className = `theme-btn p-4 border rounded-xl text-left bg-white border-gray-200 ${activeTheme === theme.id ? 'active' : ''}`;
           button.innerHTML = `
-          <h3 class="font-medium">${theme.name}</h3>
+          <h3 class="text-sm">${theme.name}</h3>
         `;
           button.addEventListener('click', () => {
             document.querySelectorAll('.theme-btn').forEach((btn) => btn.classList.remove('active'));
