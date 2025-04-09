@@ -21,7 +21,6 @@
         background-color: #fff7ed;
       }
       .bingo-cell {
-        aspect-ratio: 1/1;
         transition: all 0.3s ease;
         position: relative;
       }
@@ -419,12 +418,12 @@
           const cell = document.createElement('div');
           const stateClass = cellStates[index] === 1 ? 'selected-green' : cellStates[index] === 2 ? 'selected-red' : '';
 
-          cell.className = `bingo-cell flex items-center justify-center p-1 bg-white border rounded-xl shadow-sm text-center h-full w-full ${stateClass}`;
+          cell.className = `bingo-cell flex items-center justify-center p-2 bg-white border rounded-xl shadow-sm text-center h-full w-full ${stateClass}`;
           cell.dataset.index = index;
           cell.dataset.content = item;
 
           const content = document.createElement('p');
-          content.className = 'text-sm leading-tight';
+          content.className = 'text-xs leading-tight';
           content.textContent = item;
 
           cell.appendChild(content);
